@@ -1,0 +1,16 @@
+p{
+  border-style :inset;
+  border-width:5px;
+  border-color:lightblue;
+  border-radius:10px;/*to make curve on the edges*/
+  padding: 7px;/* to make a space between the letters and the border*/
+}
+h1{
+  border-top-style: dotted;
+  border-bottom-style: dotted;
+  border-left-style:double;
+  border-left-width: 10px;
+  border-left-color:blanchedalmond;
+border-right-style: groove;
+text-align:center;
+}
