@@ -1,0 +1,109 @@
+body{
+  background-color:white;
+}
+h1{
+  text-align:center;
+  color:rgb(77, 125, 221);
+  font-family:Arial, Helvetica, sans-serif;
+}
+/*button 1*/
+.b1{
+  border:solid 5px;
+background-color:black;
+color:white;
+font-weight:bold;
+padding-top:15px;
+padding-bottom:15px;
+padding-left:20px;
+padding-right:20px;
+margin:10px;
+}
+/*button 2*/
+.b2{
+  border:solid 5px rgb(255, 213, 2);
+  border-radius:25px;
+  background-color:rgb(255, 213, 2);
+  color:black;
+  padding-left:50px;
+  padding-right:50px;
+  padding-top:7px;
+  padding-bottom:7px;
+  margin:10px;
+  font-weight:bold;
+  font-size:17px;
+  cursor:pointer;
+  transition:opacity 0.5s;
+}
+.b2:hover{
+  opacity:0.5;
+}
+/*button 3*/
+.b3{
+  border:solid 5px rgba(54, 169, 66, 0.881);
+  border-radius:5px;
+  background-color:rgba(54, 169, 66, 0.881);
+  color:white;
+  padding-left:21px;
+  padding-right:21px;
+  padding-top:8px;
+  padding-bottom:8px;
+  margin:10px;
+  font-weight:bold;
+  font-size:15px;
+  cursor:pointer;
+  box-shadow:8px 8px 8px grey;
+}
+.b3:hover {
+  opacity: 0.8;
+}
+.b4{
+  border:solid 10px purple;
+  background-color:purple;
+  color:white;
+  margin:5px;
+  padding-left:7px;
+  padding-right:7px;
+  padding-top:3px;
+  padding-bottom:3px;
+  font-weight:bold;
+  font-size:15px;
+   border-radius:3px;
+}
+
+.b5{
+  border:solid 10px;
+  background-color:rgb(128, 128, 128);
+  color:white;
+  padding-left:25px;
+  padding-right:25px;
+  padding-top:12px;  
+  padding-bottom:12px;
+  font-weight:bold;
+  font-size:15px;
+  border-radius:15px;
+}
+.b6{
+  border:solid 10px ;
+  background-color: rgba(11, 11, 241, 0.705);
+  border-radius:27px;
+  color:white;
+  padding-left:25px;
+  padding-right:25px;
+  padding-top:9px;  
+  padding-bottom:9px;
+  font-weight:bold;
+  font-size:15px;
+  margin:5px;
+}
+.b7{
+  border:solid 1px blue;
+  background-color:white;
+  color:blue;
+  border-radius:15px;
+  font-weight:bold;
+  font-size:15px;
+  padding-right:15px;
+  padding-left:15px;
+  padding-top:7px;  
+  padding-bottom:7px;
+}
