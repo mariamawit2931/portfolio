@@ -1,0 +1,599 @@
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import heroImg from "@/assets/hero-portrait.jpg";
+import project1 from "@/assets/project-1.jpg";
+import project2 from "@/assets/project-2.jpg";
+import project3 from "@/assets/project-3.jpg";
+import project4 from "@/assets/project-4.jpg";
+import {
+  Menu, X, ArrowDown, Github, Linkedin, Twitter, Mail, MapPin,
+  Send, Code2, Palette, Zap, ExternalLink, Download, Quote,
+  Calendar, Briefcase, ChevronRight, Heart, Star, Award,
+  Sun, Moon
+} from "lucide-react";
+
+/* ─────────────── STYLES (all CSS-in-JS in one file) ─────────────── */
+const styles = {
+  /* ── Base ── */
+  page: "min-h-screen bg-background text-foreground font-body antialiased",
+
+  /* ── Nav ── */
+  nav: "fixed top-0 left-0 right-0 z-50 glass-card",
+  navInner: "container mx-auto flex items-center justify-between px-6 py-4",
+  navLogo: "text-xl font-display font-bold text-gradient cursor-pointer",
+  navLink: "text-sm text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer",
+  navCta: "px-5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer",
+  navMobile: "md:hidden text-foreground cursor-pointer bg-transparent border-none",
+  navMobileMenu: "md:hidden overflow-hidden glass-card border-t border-border",
+  navMobileLink: "text-left text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none text-base cursor-pointer",
+
+  /* ── Section ── */
+  section: "py-24",
+  sectionLabel: "text-primary font-semibold text-sm tracking-widest uppercase mb-3",
+  sectionTitle: "text-4xl md:text-5xl font-display font-bold mb-6",
+  container: "container mx-auto px-6",
+
+  /* ── Hero ── */
+  heroSection: "min-h-screen flex items-center pt-20 pb-12",
+  heroGrid: "grid lg:grid-cols-2 gap-12 items-center",
+  heroSubtitle: "text-primary font-semibold text-sm tracking-widest uppercase mb-4",
+  heroTitle: "text-5xl md:text-7xl font-display font-bold leading-[1.05] mb-6",
+  heroDesc: "text-muted-foreground text-lg max-w-md mb-8 leading-relaxed",
+  heroBtnPrimary: "px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity cursor-pointer border-none",
+  heroBtnSecondary: "px-8 py-3.5 rounded-full border border-border text-foreground font-semibold hover:bg-secondary transition-colors cursor-pointer bg-transparent",
+  heroBtnDownload: "px-8 py-3.5 rounded-full border border-primary/30 text-primary font-semibold hover:bg-primary/10 transition-colors cursor-pointer bg-transparent flex items-center gap-2",
+  socialBtn: "w-11 h-11 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors",
+  heroImgWrap: "relative",
+  heroImg: "w-72 h-72 md:w-96 md:h-96 rounded-3xl overflow-hidden border-2 border-border",
+  heroImgInner: "w-full h-full object-cover",
+  heroBadge: "absolute glass-card rounded-2xl px-5 py-3",
+  heroBadgeLabel: "text-xs text-muted-foreground",
+  heroBadgeValue: "text-2xl font-display font-bold text-gradient",
+  heroStatus: "flex items-center gap-2 mb-6",
+  heroStatusDot: "w-3 h-3 rounded-full bg-green-500 animate-pulse",
+  heroStatusText: "text-sm text-muted-foreground",
+
+  /* ── About cards ── */
+  cardGrid: "grid md:grid-cols-3 gap-6",
+  card: "glass-card rounded-2xl p-8 hover-lift cursor-default",
+  cardIcon: "w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5",
+  cardTitle: "text-xl font-display font-semibold mb-3",
+  cardDesc: "text-muted-foreground leading-relaxed",
+
+  /* ── Experience timeline ── */
+  timeline: "relative border-l-2 border-border ml-4 pl-8 space-y-10",
+  timelineDot: "absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-primary border-2 border-background",
+  timelineDate: "text-xs text-primary font-semibold uppercase tracking-wider mb-1",
+  timelineRole: "text-lg font-display font-semibold mb-1",
+  timelineCompany: "text-muted-foreground text-sm mb-2",
+  timelineDesc: "text-muted-foreground text-sm leading-relaxed",
+
+  /* ── Stats ── */
+  statsGrid: "grid grid-cols-2 md:grid-cols-4 gap-6 mb-16",
+  statCard: "glass-card rounded-2xl p-6 text-center",
+  statValue: "text-3xl font-display font-bold text-gradient mb-1",
+  statLabel: "text-sm text-muted-foreground",
+
+  /* ── Projects ── */
+  projectGrid: "grid md:grid-cols-2 gap-8",
+  projectCard: "group glass-card rounded-2xl overflow-hidden hover-lift",
+  projectImg: "relative overflow-hidden aspect-video",
+  projectImgInner: "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110",
+  projectOverlay: "absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-6",
+  projectLiveBtn: "w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-80 transition-opacity",
+  projectCodeBtn: "w-10 h-10 rounded-full border border-foreground/30 text-foreground flex items-center justify-center hover:bg-secondary transition-colors",
+  projectBody: "p-6",
+  projectTags: "flex flex-wrap gap-2 mb-3",
+  projectTag: "text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-medium",
+  projectTitle: "text-xl font-display font-semibold mb-2",
+  projectDesc: "text-muted-foreground text-sm",
+
+  /* ── Skills ── */
+  skillsGrid: "grid md:grid-cols-3 gap-8",
+  skillGroup: "glass-card rounded-2xl p-8",
+  skillGroupTitle: "text-lg font-display font-semibold mb-5 text-gradient",
+  skillPills: "flex flex-wrap gap-3",
+  skillPill: "px-4 py-2 rounded-full border border-border text-sm text-foreground hover:border-primary hover:text-primary transition-colors cursor-default",
+
+  /* ── Testimonials ── */
+  testimonialGrid: "grid md:grid-cols-2 gap-8",
+  testimonialCard: "glass-card rounded-2xl p-8 relative",
+  testimonialQuote: "text-muted-foreground leading-relaxed italic mb-6",
+  testimonialAuthor: "flex items-center gap-3",
+  testimonialAvatar: "w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm",
+  testimonialName: "font-semibold text-sm",
+  testimonialRole: "text-xs text-muted-foreground",
+  testimonialStars: "flex gap-1 mb-4",
+
+  /* ── Contact ── */
+  contactGrid: "grid lg:grid-cols-2 gap-16",
+  contactInfo: "flex items-center gap-4",
+  contactIcon: "w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center",
+  contactForm: "glass-card rounded-2xl p-8 space-y-6",
+  input: "w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors",
+  textarea: "w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none",
+  submitBtn: "w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer border-none",
+  label: "text-sm text-muted-foreground mb-2 block",
+
+  /* ── Footer ── */
+  footer: "border-t border-border py-10",
+  footerInner: "container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4",
+  footerText: "text-sm text-muted-foreground",
+  footerSocial: "text-muted-foreground hover:text-primary transition-colors",
+} as const;
+
+/* ─────────────── DATA ─────────────── */
+const NAV_LINKS = ["About", "Experience", "Work", "Skills", "Testimonials", "Contact"];
+
+const SOCIALS = [
+  { icon: Github, label: "GitHub", href: "#" },
+  { icon: Linkedin, label: "LinkedIn", href: "#" },
+  { icon: Twitter, label: "Twitter", href: "#" },
+];
+
+const ABOUT_CARDS = [
+  { icon: Code2, title: "Clean Code", desc: "Writing maintainable, scalable code using modern best practices and design patterns." },
+  { icon: Palette, title: "UI/UX Design", desc: "Creating visually stunning and intuitive interfaces that users love to interact with." },
+  { icon: Zap, title: "Performance", desc: "Optimizing every layer for blazing-fast load times and silky-smooth interactions." },
+];
+
+const STATS = [
+  { value: "5+", label: "Years Experience" },
+  { value: "40+", label: "Projects Delivered" },
+  { value: "25+", label: "Happy Clients" },
+  { value: "99%", label: "Client Satisfaction" },
+];
+
+const EXPERIENCE = [
+  { date: "2023 – Present", role: "Senior Frontend Developer", company: "TechVibe Studios", desc: "Leading the frontend team building enterprise SaaS products with React & TypeScript. Reduced load times by 40%." },
+  { date: "2021 – 2023", role: "Full-Stack Developer", company: "PixelCraft Agency", desc: "Built 20+ client websites and web apps. Introduced component libraries that cut dev time by 35%." },
+  { date: "2019 – 2021", role: "Junior Developer", company: "StartUp Labs", desc: "Developed MVPs for early-stage startups. Worked across the stack with Node.js, React, and PostgreSQL." },
+];
+
+const PROJECTS = [
+  { img: project1, title: "ShopWave E-Commerce", tags: ["React", "Node.js", "Stripe"], desc: "Full-featured online store with real-time inventory, payment integration, and admin dashboard." },
+  { img: project2, title: "FinTrack Mobile App", tags: ["React Native", "Firebase"], desc: "Mobile-first finance management app with budgeting tools and data visualization." },
+  { img: project3, title: "DataPulse Analytics", tags: ["TypeScript", "D3.js", "PostgreSQL"], desc: "Enterprise analytics dashboard processing millions of real-time data points." },
+  { img: project4, title: "Artisan Portfolio", tags: ["Next.js", "Framer Motion"], desc: "Award-winning photographer portfolio with immersive full-screen gallery experience." },
+];
+
+const SKILL_GROUPS = [
+  { label: "Frontend", skills: ["React", "TypeScript", "Tailwind CSS", "Next.js", "Framer Motion", "Vue.js"] },
+  { label: "Backend", skills: ["Node.js", "Express", "PostgreSQL", "MongoDB", "GraphQL", "REST APIs"] },
+  { label: "Tools & Design", skills: ["Git", "Docker", "Figma", "AWS", "CI/CD", "Vercel"] },
+];
+
+const TESTIMONIALS = [
+  { quote: "Sarah delivered our platform ahead of schedule with exceptional quality. Her attention to detail and communication made the entire process seamless.", name: "David Chen", role: "CEO, TechStart Inc.", initials: "DC" },
+  { quote: "Working with Sarah was an absolute pleasure. She transformed our outdated website into a modern, high-converting machine. Highly recommend!", name: "Emily Rodriguez", role: "Marketing Director, BrandLift", initials: "ER" },
+  { quote: "Her technical skills are matched only by her design sensibility. Sarah bridges the gap between engineering and creativity like no one else.", name: "James Park", role: "CTO, CloudScale", initials: "JP" },
+  { quote: "Sarah rebuilt our entire dashboard in record time. The UI is intuitive, fast, and our users love it. She's our go-to developer now.", name: "Lisa Thompson", role: "Product Manager, DataFlow", initials: "LT" },
+];
+
+/* ─────────────── HELPER COMPONENTS ─────────────── */
+const scrollTo = (id: string) =>
+  document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
+
+const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════
+   MAIN PAGE — Everything in one file
+   ═══════════════════════════════════════════════════ */
+const Index = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [scrolled, setScrolled] = useState(false);
+  const [dark, setDark] = useState(true);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success("Message sent! I'll get back to you within 24 hours ✨");
+    setForm({ name: "", email: "", message: "" });
+  };
+
+  return (
+    <div className={styles.page}>
+      {/* ────────── NAVBAR ────────── */}
+      <motion.nav
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className={`${styles.nav} ${scrolled ? "shadow-lg" : ""}`}
+      >
+        <div className={styles.navInner}>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className={styles.navLogo}>
+            Sarah.dev
+          </button>
+          <div className="hidden md:flex items-center gap-8">
+            {NAV_LINKS.map((l) => (
+              <button key={l} onClick={() => scrollTo(l)} className={styles.navLink}>{l}</button>
+            ))}
+            <button onClick={() => setDark(!dark)} className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors" aria-label="Toggle theme">
+              {dark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            <button onClick={() => scrollTo("Contact")} className={styles.navCta}>Hire Me</button>
+          </div>
+          <button onClick={() => setMenuOpen(!menuOpen)} className={styles.navMobile}>
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className={styles.navMobileMenu}
+            >
+              <div className="flex flex-col gap-4 px-6 py-6">
+                {NAV_LINKS.map((l) => (
+                  <button key={l} onClick={() => { scrollTo(l); setMenuOpen(false); }} className={styles.navMobileLink}>{l}</button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
+
+      {/* ────────── HERO ────────── */}
+      <section className={styles.heroSection}>
+        <div className={styles.container}>
+          <div className={styles.heroGrid}>
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="order-2 lg:order-1"
+            >
+              <div className={styles.heroStatus}>
+                <span className={styles.heroStatusDot} />
+                <span className={styles.heroStatusText}>Available for freelance work</span>
+              </div>
+              <p className={styles.heroSubtitle}>Full-Stack Developer & UI Designer</p>
+              <h1 className={styles.heroTitle}>
+                Hi, I'm <span className="text-gradient">Sarah</span>.<br />
+                I build things<br />for the web.
+              </h1>
+              <p className={styles.heroDesc}>
+                I craft modern, performant web applications with clean code and bold design.
+                Let's turn your vision into a digital experience people remember.
+              </p>
+
+              <div className="flex flex-wrap gap-4 mb-10">
+                <button onClick={() => scrollTo("Work")} className={styles.heroBtnPrimary}>
+                  View My Work
+                </button>
+                <button onClick={() => scrollTo("Contact")} className={styles.heroBtnSecondary}>
+                  Get In Touch
+                </button>
+                <a href="#" className={styles.heroBtnDownload}>
+                  <Download size={16} /> Resume
+                </a>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {SOCIALS.map(({ icon: Icon, label, href }) => (
+                  <a key={label} href={href} aria-label={label} className={styles.socialBtn}>
+                    <Icon size={18} />
+                  </a>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="order-1 lg:order-2 flex justify-center"
+            >
+              <div className={styles.heroImgWrap}>
+                <div className={styles.heroImg}>
+                  <img src={heroImg} alt="Sarah — Developer portrait" className={styles.heroImgInner} loading="eager" />
+                </div>
+                <div className={`${styles.heroBadge} -bottom-4 -left-4`}>
+                  <p className={styles.heroBadgeLabel}>Experience</p>
+                  <p className={styles.heroBadgeValue}>5+ Yrs</p>
+                </div>
+                <div className={`${styles.heroBadge} -top-4 -right-4`}>
+                  <p className={styles.heroBadgeLabel}>Projects</p>
+                  <p className={styles.heroBadgeValue}>40+</p>
+                </div>
+                <div className={`${styles.heroBadge} top-1/2 -right-8 hidden lg:block`}>
+                  <p className={styles.heroBadgeLabel}>Clients</p>
+                  <p className={styles.heroBadgeValue}>25+</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="hidden lg:flex justify-center mt-16"
+          >
+            <ArrowDown className="text-muted-foreground" size={24} />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ────────── STATS BAR ────────── */}
+      <section className={styles.container}>
+        <div className={styles.statsGrid}>
+          {STATS.map((s, i) => (
+            <FadeIn key={s.label} delay={i * 0.1}>
+              <div className={styles.statCard}>
+                <p className={styles.statValue}>{s.value}</p>
+                <p className={styles.statLabel}>{s.label}</p>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </section>
+
+      {/* ────────── ABOUT ────────── */}
+      <section id="about" className={styles.section}>
+        <div className={styles.container}>
+          <FadeIn>
+            <div className="max-w-2xl mb-16">
+              <p className={styles.sectionLabel}>About Me</p>
+              <h2 className={styles.sectionTitle}>
+                Passionate about building <span className="text-gradient">what matters</span>
+              </h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                I'm Sarah — a full-stack developer with 5+ years of experience turning complex problems
+                into elegant, user-friendly solutions. I specialize in React, TypeScript, and Node.js,
+                and I'm obsessed with the intersection of design and engineering. When I'm not coding,
+                you'll find me mentoring junior developers or exploring new creative tools.
+              </p>
+            </div>
+          </FadeIn>
+          <div className={styles.cardGrid}>
+            {ABOUT_CARDS.map((card, i) => (
+              <FadeIn key={card.title} delay={0.15 * i}>
+                <div className={styles.card}>
+                  <div className={styles.cardIcon}>
+                    <card.icon className="text-primary" size={22} />
+                  </div>
+                  <h3 className={styles.cardTitle}>{card.title}</h3>
+                  <p className={styles.cardDesc}>{card.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ────────── EXPERIENCE ────────── */}
+      <section id="experience" className={styles.section}>
+        <div className={styles.container}>
+          <FadeIn>
+            <p className={styles.sectionLabel}>Career Path</p>
+            <h2 className={styles.sectionTitle}>
+              Work <span className="text-gradient">Experience</span>
+            </h2>
+          </FadeIn>
+
+          <div className={styles.timeline}>
+            {EXPERIENCE.map((exp, i) => (
+              <FadeIn key={exp.role} delay={0.15 * i}>
+                <div className="relative">
+                  <span className={styles.timelineDot} />
+                  <p className={styles.timelineDate}>{exp.date}</p>
+                  <h3 className={styles.timelineRole}>{exp.role}</h3>
+                  <p className={styles.timelineCompany}>{exp.company}</p>
+                  <p className={styles.timelineDesc}>{exp.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ────────── PROJECTS ────────── */}
+      <section id="work" className={styles.section}>
+        <div className={styles.container}>
+          <FadeIn>
+            <p className={styles.sectionLabel}>Selected Work</p>
+            <h2 className={styles.sectionTitle}>
+              Featured <span className="text-gradient">Projects</span>
+            </h2>
+          </FadeIn>
+          <div className={styles.projectGrid}>
+            {PROJECTS.map((p, i) => (
+              <FadeIn key={p.title} delay={0.15 * i}>
+                <div className={styles.projectCard}>
+                  <div className={styles.projectImg}>
+                    <img src={p.img} alt={p.title} className={styles.projectImgInner} loading="lazy" />
+                    <div className={styles.projectOverlay}>
+                      <div />
+                      <div className="flex gap-3">
+                        <a href="#" className={styles.projectLiveBtn} aria-label="View live">
+                          <ExternalLink size={16} />
+                        </a>
+                        <a href="#" className={styles.projectCodeBtn} aria-label="View code">
+                          <Github size={16} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.projectBody}>
+                    <div className={styles.projectTags}>
+                      {p.tags.map((t) => (
+                        <span key={t} className={styles.projectTag}>{t}</span>
+                      ))}
+                    </div>
+                    <h3 className={styles.projectTitle}>{p.title}</h3>
+                    <p className={styles.projectDesc}>{p.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ────────── SKILLS ────────── */}
+      <section id="skills" className={styles.section}>
+        <div className={styles.container}>
+          <FadeIn>
+            <p className={styles.sectionLabel}>Tech Stack</p>
+            <h2 className={styles.sectionTitle}>
+              Skills & <span className="text-gradient">Technologies</span>
+            </h2>
+          </FadeIn>
+          <div className={styles.skillsGrid}>
+            {SKILL_GROUPS.map((group, gi) => (
+              <FadeIn key={group.label} delay={0.15 * gi}>
+                <div className={styles.skillGroup}>
+                  <h3 className={styles.skillGroupTitle}>{group.label}</h3>
+                  <div className={styles.skillPills}>
+                    {group.skills.map((s) => (
+                      <span key={s} className={styles.skillPill}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ────────── TESTIMONIALS ────────── */}
+      <section id="testimonials" className={styles.section}>
+        <div className={styles.container}>
+          <FadeIn>
+            <p className={styles.sectionLabel}>What Clients Say</p>
+            <h2 className={styles.sectionTitle}>
+              Client <span className="text-gradient">Testimonials</span>
+            </h2>
+          </FadeIn>
+          <div className={styles.testimonialGrid}>
+            {TESTIMONIALS.map((t, i) => (
+              <FadeIn key={t.name} delay={0.15 * i}>
+                <div className={styles.testimonialCard}>
+                  <Quote className="text-primary/20 absolute top-6 right-6" size={32} />
+                  <div className={styles.testimonialStars}>
+                    {[...Array(5)].map((_, si) => (
+                      <Star key={si} size={14} className="text-primary fill-primary" />
+                    ))}
+                  </div>
+                  <p className={styles.testimonialQuote}>"{t.quote}"</p>
+                  <div className={styles.testimonialAuthor}>
+                    <div className={styles.testimonialAvatar}>{t.initials}</div>
+                    <div>
+                      <p className={styles.testimonialName}>{t.name}</p>
+                      <p className={styles.testimonialRole}>{t.role}</p>
+                    </div>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ────────── CONTACT ────────── */}
+      <section id="contact" className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.contactGrid}>
+            <FadeIn>
+              <div>
+                <p className={styles.sectionLabel}>Get In Touch</p>
+                <h2 className={styles.sectionTitle}>
+                  Let's work <span className="text-gradient">together</span>
+                </h2>
+                <p className="text-muted-foreground text-lg leading-relaxed mb-10">
+                  Have a project in mind or just want to chat? Drop me a message and I'll get back to you within 24 hours.
+                </p>
+                <div className="space-y-6">
+                  <div className={styles.contactInfo}>
+                    <div className={styles.contactIcon}><Mail className="text-primary" size={20} /></div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium">sarah@developer.com</p>
+                    </div>
+                  </div>
+                  <div className={styles.contactInfo}>
+                    <div className={styles.contactIcon}><MapPin className="text-primary" size={20} /></div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Location</p>
+                      <p className="font-medium">San Francisco, CA</p>
+                    </div>
+                  </div>
+                  <div className={styles.contactInfo}>
+                    <div className={styles.contactIcon}><Briefcase className="text-primary" size={20} /></div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Status</p>
+                      <p className="font-medium text-primary">Open to opportunities</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <form onSubmit={handleSubmit} className={styles.contactForm}>
+                <div>
+                  <label className={styles.label}>Name</label>
+                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className={styles.input} placeholder="Your name" />
+                </div>
+                <div>
+                  <label className={styles.label}>Email</label>
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required className={styles.input} placeholder="your@email.com" />
+                </div>
+                <div>
+                  <label className={styles.label}>Message</label>
+                  <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required rows={4} className={styles.textarea} placeholder="Tell me about your project..." />
+                </div>
+                <button type="submit" className={styles.submitBtn}>
+                  Send Message <Send size={16} />
+                </button>
+              </form>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ────────── FOOTER ────────── */}
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <p className={styles.footerText}>
+            © 2026 Sarah.dev — Built with <Heart size={14} className="inline text-primary" /> All rights reserved.
+          </p>
+          <div className="flex items-center gap-4">
+            {[Github, Linkedin, Twitter].map((Icon, i) => (
+              <a key={i} href="#" className={styles.footerSocial}><Icon size={18} /></a>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Index;
